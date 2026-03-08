@@ -1,4 +1,4 @@
-# Battlesnake Python Starter Project
+# Battlesnake C++ Starter Project
 
 An official Battlesnake template written in Python. Get started at [play.battlesnake.com](https://play.battlesnake.com).
 
