@@ -507,7 +507,7 @@ int main()
         agent_mutex.unlock();
 
         // RUN MCTS (Set to 80ms for 4 snake local testing, increase to 350ms later)
-        string next_move = agent->get_best_move(state, start_time, 80); 
+        string next_move = agent->get_best_move(state, start_time, 350); 
 
         // Veto System
         if (find(absolute_safe.begin(), absolute_safe.end(), next_move) == absolute_safe.end()) {
