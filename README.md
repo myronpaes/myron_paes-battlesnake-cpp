@@ -1,59 +1,40 @@
-# Battlesnake C++ Starter Project
+# Battlesnake: C++ Monte Carlo Tree Search Engine
 
-An official Battlesnake template written in C++. Get started at [play.battlesnake.com](https://play.battlesnake.com).
+## Overview
 
-![Battlesnake Logo](https://media.battlesnake.com/social/StarterSnakeGitHubRepos_Python.png)
+This Battlesnake engine is a high-performance cybernetic brain designed to dominate the arena through probabilistic forecasting and spatial control. This architecture treats board survival as a strict resource optimization problem, executing thousands of simulated futures per turn to maximize the return on investment for every movement decision.
 
-This project is a great starting point for anyone wanting to program their first Battlesnake in C++. It can be run locally or easily deployed to a cloud provider of your choosing. See the [Battlesnake API Docs](https://docs.battlesnake.com/api) for more detail. 
+## Languages & System Architecture
 
-[![Run on Replit](https://repl.it/badge/github/BattlesnakeOfficial/starter-snake-python)](https://replit.com/@Battlesnake/starter-snake-python)
+The system is built for absolute execution speed, bypassing the standard latency limitations of interpreted languages.
 
-## Technologies Used
+* **C++ (C++17):** The core engine is written entirely in compiled C++ to eliminate Garbage Collection pauses and Global Interpreter Lock (GIL) bottlenecks, allowing for maximum hardware utilization.
+* **Single-Header Libraries:** Utilizes `cpp-httplib` for multithreaded web serving and `nlohmann/json` for high-speed payload parsing.
+* **Docker Containerization:** Deployed via a custom `gcc:13` Docker image utilizing aggressive `-O3` compiler optimizations and `-pthread` multithreading to ensure sub-millisecond API response times.
 
-This project comes with an optional [Dockerfile](https://docs.docker.com/engine/reference/builder/) to help with deployment.
+## Statistical Methodologies
 
-## Run Your Battlesnake
+### 1. Monte Carlo Tree Search (MCTS)
 
-Install dependencies using pip
+Rather than relying on brittle, hardcoded heuristics, the engine leverages an MCTS algorithm to statistically sample thousands of potential future board states within a strict 500-millisecond timeout window. The engine executes rapid rollouts of parallel game universes, backpropagating the survival rates up the decision tree to weight the most mathematically viable paths.
 
-```sh
-pip install -r requirements.txt
-```
+### 2. Upper Confidence Bound Applied to Trees (UCB1)
 
-Start your Battlesnake
+To navigate the multi-armed bandit problem inherent in branching game states, the engine utilizes the UCB1 formula. This elegantly balances the *exploitation* of known winning paths with the *exploration* of unproven, potentially dominant strategies.
 
-```sh
-python main.py
-```
+$$UCB1 = \frac{w_i}{n_i} + c \sqrt{\frac{\ln(N)}{n_i}}$$
 
-You should see the following output once it is running
+* $w_i$: Total accumulated win score of the current node.
+* $n_i$: Total number of times this specific node has been visited.
+* $N$: Total visits to the parent node.
+* $c$: Exploration parameter, mathematically calibrated to $\sqrt{2}$.
 
-```sh
-Running your Battlesnake at http://0.0.0.0:8000
- * Serving Flask app 'My Battlesnake'
- * Debug mode: off
-```
+### 3. Voronoi Spatial Evaluation
 
-Open [localhost:8000](http://localhost:8000) in your browser and you should see
+When a simulated rollout reaches a terminal depth, the engine quantifies the strategic value of the board using a high-speed Breadth-First Search (BFS) mapped to a flat 1D Boolean array. This generates a Voronoi diagram of the grid, calculating the exact percentage of cells the engine can reach before any enemy snake. The higher the spatial control ratio, the higher the statistical value of the node.
 
-```json
-{"apiversion":"1","author":"","color":"#888888","head":"default","tail":"default"}
-```
+### 4. Deterministic Precision Rounding
 
-## Play a Game Locally
+Floating-point variations across different CPU threads can severely corrupt MCTS probability branches over thousands of parallel simulations. To maintain absolute mathematical fidelity, every heuristic and probabilistic calculation is subjected to a strict fast-math clamp. The engine strictly applies standard rounding rules (0-4 rounds down, 5+ rounds up) to precisely 5 decimal places.
 
-Install the [Battlesnake CLI](https://github.com/BattlesnakeOfficial/rules/tree/main/cli)
-* You can [download compiled binaries here](https://github.com/BattlesnakeOfficial/rules/releases)
-* or [install as a go package](https://github.com/BattlesnakeOfficial/rules/tree/main/cli#installation) (requires Go 1.18 or higher)
-
-Command to run a local game
-
-```sh
-battlesnake play -W 11 -H 11 --name 'Python Starter Project' --url http://localhost:8000 -g solo --browser
-```
-
-## Next Steps
-
-Continue with the [Battlesnake Quickstart Guide](https://docs.battlesnake.com/quickstart) to customize and improve your Battlesnake's behavior.
-
-**Note:** To play games on [play.battlesnake.com](https://play.battlesnake.com) you'll need to deploy your Battlesnake to a live web server OR use a port forwarding tool like [ngrok](https://ngrok.com/) to access your server locally.
+$$f(x) = \frac{\lfloor x \times 100000 + 0.5 \rfloor}{100000}$$
